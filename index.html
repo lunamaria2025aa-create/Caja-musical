@@ -1,247 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Algo para ti</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un Pequeño Detalle</title>
+    <style>
+        /* --- ESTILOS GENERALES (Fondo y Página) --- */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Fondo con degradado suave y romántico */
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            font-family: 'Courier New', Courier, monospace; /* Fuente estilo máquina de escribir, sutil */
+            overflow: hidden; /* Para que no salgan barras de desplazamiento */
+        }
 
-<style>
+        /* --- LA CAJITA MUSICAL (Contenedor Principal) --- */
+        .music-box-container {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            cursor: pointer;
+            perspective: 1000px; /* Necesario para el efecto 3D de la tapa */
+        }
 
-body{
-margin:0;
-background:black;
-color:white;
-font-family:Arial;
-text-align:center;
-overflow:hidden;
-}
+        /* --- LA TAPA DE LA CAJA --- */
+        .box-lid {
+            width: 100%;
+            height: 100%;
+            background-color: #e0ac9a; /* Color madera suave / rosa palo */
+            border: 4px solid #c08e7b;
+            border-radius: 8px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            z-index: 10;
+            transition: transform 1.2s ease-in-out, opacity 1s ease-in-out;
+            transform-origin: top; /* La bisagra está arriba */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
 
-#moon{
-position:absolute;
-top:80px;
-left:50%;
-transform:translateX(-50%);
-width:180px;
-height:180px;
-border-radius:50%;
-background:#eee;
-box-shadow:0 0 40px white;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:40px;
-color:black;
-}
+        /* Texto sutil en la tapa */
+        .box-lid::after {
+            content: "Haz clic";
+            font-size: 14px;
+            opacity: 0.8;
+        }
 
-#bunny{
-font-size:60px;
-margin-top:250px;
-}
+        /* --- EL INTERIOR DE LA CAJA --- */
+        .box-body {
+            width: 100%;
+            height: 100%;
+            background-color: #5d4037; /* Interior oscuro, como terciopelo o madera oscura */
+            border-radius: 8px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            z-index: 1;
+            overflow: hidden; /* Para que el conejito no se vea antes de tiempo */
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5); /* Sombra interior para profundidad */
+        }
 
-button{
-padding:15px 30px;
-font-size:20px;
-border:none;
-border-radius:10px;
-background:pink;
-cursor:pointer;
-margin-top:20px;
-}
+        /* --- EL CONEJITO (Usando Emojis para sencillez, ¡pero muy tierno!) --- */
+        .bunny-surprise {
+            font-size: 100px; /* Tamaño del conejito */
+            position: absolute;
+            bottom: -110px; /* Empieza escondido debajo de la caja */
+            left: 50%;
+            transform: translateX(-50%);
+            transition: bottom 1.5s ease-out 0.5s, transform 3s linear 1s infinite; /* Animación de subida y giro */
+            z-index: 2;
+        }
 
-#acertijos{
-display:none;
-margin-top:20px;
-}
+        /* El Ramo de Flores (también emoji) */
+        .bunny-surprise::after {
+            content: "💐";
+            font-size: 40px;
+            position: absolute;
+            bottom: 20px;
+            right: -10px;
+        }
 
-input{
-padding:10px;
-font-size:16px;
-}
+        /* --- ESTADOS DE LA ANIMACIÓN (Al abrirse) --- */
 
-#mensaje{
-font-size:40px;
-margin-top:30px;
-}
+        /* 1. La Tapa se levanta */
+        .music-box-container.open .box-lid {
+            transform: rotateX(-110deg); /* Se abre hacia arriba y atrás */
+            opacity: 0.3; /* Se vuelve un poco transparente */
+        }
 
-#pregunta{
-display:none;
-margin-top:40px;
-}
+        /* 2. El Conejito sube */
+        .music-box-container.open .bunny-surprise {
+            bottom: 20px; /* Sube hasta estar dentro de la caja visible */
+        }
 
-</style>
+        /* 3. El Conejito empieza a girar (como en las cajitas reales) */
+        .music-box-container.open .bunny-surprise {
+            animation: bunnySpin 3s linear infinite 2s; /* Empieza a girar después de subir */
+        }
+
+        /* Definición de la animación de giro */
+        @keyframes bunnySpin {
+            0% { transform: translateX(-50%) rotateY(0deg); }
+            100% { transform: translateX(-50%) rotateY(360deg); }
+        }
+
+    </style>
 </head>
-
 <body>
 
-<div id="moon">🌙</div>
+    <div class="music-box-container" id="musicBox">
+        
+        <div class="box-lid"></div>
+        
+        <div class="box-body">
+            <div class="bunny-surprise">
+                🐰
+            </div>
+        </div>
 
-<div id="bunny">🐰🎀</div>
+    </div>
 
-<h1>Debo decirte algo...</h1>
+    <script>
+        // Pequeño script para manejar el clic y activar la animación
+        const musicBox = document.getElementById('musicBox');
+        // const music = document.getElementById('music'); // Descomenta si usas audio
 
-<button onclick="empezar()">EMPEZAR</button>
-
-<div id="acertijos">
-
-<p>Acertijo 1: ¿Cuánto es 2 + 2?</p>
-<input id="r1">
-<button onclick="check1()">OK</button>
-
-<div id="a2" style="display:none">
-
-<p>Acertijo 2: ¿Color del cielo?</p>
-<input id="r2">
-<button onclick="check2()">OK</button>
-
-</div>
-
-<div id="a3" style="display:none">
-
-<p>Acertijo 3: ¿Cuántos días tiene una semana?</p>
-<input id="r3">
-<button onclick="check3()">OK</button>
-
-</div>
-
-</div>
-
-<div id="mensaje"></div>
-
-<div id="pregunta">
-
-<h2>¿Quieres ser la aya de mi Mitsuki?</h2>
-
-<button onclick="si()">SI</button>
-<button onclick="no()">NO</button>
-
-</div>
-
-<div id="player" style="display:none"></div>
-
-<script src="https://www.youtube.com/iframe_api"></script>
-
-<script>
-
-let player
-
-function onYouTubeIframeAPIReady(){
-player=new YT.Player('player',{
-height:'0',
-width:'0',
-videoId:'Xh6Qh8qkC5Q'
-})
-}
-
-function empezar(){
-
-if(player){player.playVideo()}
-
-document.querySelector("button").style.display="none"
-
-document.getElementById("acertijos").style.display="block"
-
-}
-
-function check1(){
-if(document.getElementById("r1").value==4){
-document.getElementById("a2").style.display="block"
-}
-}
-
-function check2(){
-if(document.getElementById("r2").value.toLowerCase()=="azul"){
-document.getElementById("a3").style.display="block"
-}
-}
-
-function check3(){
-if(document.getElementById("r3").value==7){
-mensaje()
-}
-}
-
-function mensaje(){
-
-let text="me gustas"
-let i=0
-let m=document.getElementById("mensaje")
-
-let intervalo=setInterval(function(){
-
-m.innerHTML+=text[i]
-
-i++
-
-if(i>=text.length){
-clearInterval(intervalo)
-document.getElementById("pregunta").style.display="block"
-}
-
-},300)
-
-}
-
-function firework(){
-
-let f=document.createElement("div")
-f.innerHTML="✨"
-f.style.position="absolute"
-f.style.left=Math.random()*window.innerWidth+"px"
-f.style.top=Math.random()*window.innerHeight+"px"
-f.style.fontSize="30px"
-
-document.body.appendChild(f)
-
-setTimeout(()=>{f.remove()},2000)
-
-}
-
-function corazon(){
-
-let cx=window.innerWidth/2
-let cy=window.innerHeight/2
-
-for(let t=0;t<Math.PI*2;t+=0.1){
-
-let x=16*Math.pow(Math.sin(t),3)
-let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))
-
-let s=document.createElement("div")
-
-s.innerHTML="✨"
-s.style.position="absolute"
-
-s.style.left=cx+x*15+"px"
-s.style.top=cy+y*15+"px"
-
-s.style.fontSize="25px"
-
-document.body.appendChild(s)
-
-setTimeout(()=>{s.remove()},4000)
-
-}
-
-}
-
-function si(){
-
-document.getElementById("pregunta").style.display="none"
-
-document.getElementById("moon").innerHTML="MANI"
-
-for(let i=0;i<8;i++){
-setTimeout(firework,i*500)
-}
-
-setTimeout(corazon,2000)
-
-}
-
-function no(){
-alert("piénsalo otra vez 🐰")
-}
-
-</script>
+        musicBox.addEventListener('click', () => {
+            // Añade o quita la clase 'open' al hacer clic
+            musicBox.classList.toggle('open');
+            
+            // Si quieres añadir música, descomenta esto:
+            /*
+            if (musicBox.classList.contains('open')) {
+                music.play();
+            } else {
+                music.pause();
+                music.currentTime = 0; // Reinicia la canción
+            }
+            */
+        });
+    </script>
 
 </body>
 </html>
