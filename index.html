@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caja de Música de Momentos</title>
+    <title>Caja de Música de Momentos 3D</title>
     <style>
-        /* --- ESTILOS GENERALES Y ESTÉTICA DE PAPEL --- */
+        /* --- ESTILOS GENERALES Y FONDO --- */
         :root {
-            --bg-page: #e8f1f5; /* Fondo suave de la página */
-            --box-main: #b8d9ea; /* Color de la caja de la imagen */
-            --paper-cream: #fbf9f1; /* Interior crema */
-            --vinyl-black: #1a1a1a;
-            --vinyl-center: #88c0d0; /* Centro azul del disco */
-            --shadow-soft: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.7);
-            --shadow-inner: inset 2px 2px 5px rgba(0,0,0,0.15), inset -2px -2px 5px rgba(255,255,255,0.8);
+            --bg-page: #f2f6f9; /* Fondo suave y limpio */
+            --box-main: #b8d9ea; /* Color de la caja (azul pastel suave) */
+            --paper-cream: #fbf9f1; /* Interior de papel */
+            --forest-green: #a3cc98; /* Un verde pastel suave */
+            --shadow-soft: 0 10px 30px rgba(0,0,0,0.1);
+            --shadow-inner: inset 0 2px 5px rgba(0,0,0,0.1), inset 0 -2px 5px rgba(255,255,255,0.7);
         }
 
         body {
@@ -24,160 +23,167 @@
             align-items: center;
             min-height: 100vh;
             background-color: var(--bg-page);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Georgia', serif; /* Fuente elegante y clásica */
             overflow: hidden;
+            perspective: 2000px; /* Esencial para el efecto 3D global */
         }
 
-        /* --- CONTENEDOR PRINCIPAL DEL REPRODUCTOR --- */
-        .player-container {
-            width: 350px;
-            height: 450px;
-            background-color: var(--box-main);
-            border-radius: 20px;
-            box-shadow: var(--shadow-soft);
+        /* --- CONTENEDOR DE LA CAJA (3D) --- */
+        .box-container {
+            width: 320px;
+            height: 380px;
             position: relative;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
+            transform-style: preserve-3d; /* Permite elementos 3D dentro */
+            transition: transform 1.5s ease; /* Transición suave de la caja entera */
             cursor: pointer;
-            overflow: hidden; /* Para los corazones flotantes */
         }
 
-        /* --- LA TAPA LEVANTADA (Con el disco trasero) --- */
-        .lid-back {
-            width: 90%;
-            height: 40%;
-            background-color: var(--paper-cream);
-            border-radius: 15px;
-            margin: 0 auto 20px auto;
-            position: relative;
-            box-shadow: var(--shadow-inner);
-            overflow: hidden;
-        }
-
-        /* El medio disco de fondo */
-        .rear-vinyl {
-            width: 140px;
-            height: 140px;
-            background-color: var(--vinyl-black);
-            border-radius: 50%;
-            position: absolute;
-            top: -70px; /* Medio escondido */
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        
-        .rear-vinyl-center {
-            width: 50px;
-            height: 50px;
-            background-color: var(--vinyl-center);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 2px solid rgba(255,255,255,0.5);
-        }
-
-        /* --- LA BASE CON EL DISCO PRINCIPAL --- */
-        .base-plate {
+        /* --- LA TAPA DE LA CAJA (CERRADA) --- */
+        .box-lid {
             width: 100%;
-            height: 55%;
+            height: 100%;
+            background-color: var(--box-main);
+            border-radius: 15px;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 10;
+            transform-origin: bottom center; /* Bisagra en la parte inferior */
+            transition: transform 1.5s ease-in-out; /* Animación clave */
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backface-visibility: hidden; /* Oculta la parte trasera cuando se abre */
+        }
+
+        /* Texto en la tapa (como la imagen) */
+        .box-lid-text {
+            font-size: 16px;
+            color: #555;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* --- EL CUERPO Y DIORAMA INTERIOR (Se revela al abrir) --- */
+        .box-body {
+            width: 100%;
+            height: 100%;
             background-color: var(--paper-cream);
             border-radius: 15px;
-            position: relative;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
             box-shadow: var(--shadow-inner);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden; /* Para ocultar el bosque antes de abrir */
+            transform: translateZ(-1px); /* Ligeramente detrás de la tapa */
         }
 
-        /* El disco que gira */
-        .main-vinyl {
-            width: 180px;
-            height: 180px;
-            background-color: var(--vinyl-black);
-            border-radius: 50%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        /* --- CAPAS DEL DIORAMA (EL BOSQUE) --- */
+        .diorama-forest {
+            width: 100%;
+            height: 100%;
             position: relative;
-            transition: transform 1s ease; /* Transición suave al empezar a girar */
-        }
-        
-        /* Efecto de surcos del vinilo (opcional) */
-        .main-vinyl::before {
-            content: '';
-            position: absolute;
-            top: 5px; left: 5px; right: 5px; bottom: 5px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.05);
+            transform-style: preserve-3d;
+            transition: transform 1s ease-out 0.5s; /* Empieza 0.5s después de la tapa */
+            transform: translateY(100px) rotateX(20deg); /* Empieza bajo y con ángulo */
+            opacity: 0;
         }
 
-        .main-vinyl-center {
-            width: 60px;
-            height: 60px;
-            background-color: var(--vinyl-center);
-            border-radius: 50%;
+        /* Efecto de capas de papel (papelcraft) */
+        .paper-layer {
             position: absolute;
-            top: 50%;
+            bottom: 20px;
+            width: 90%;
+            height: 70%;
+            left: 5%;
+            background-color: var(--paper-cream);
+            border-radius: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); /* Sombra para profundidad */
+            transform-origin: bottom center;
+        }
+
+        /* Capa 1: Fondo del bosque (más difuso) */
+        .layer-1 {
+            background-color: #d8e9da;
+            transform: translateZ(-30px) rotateX(-5deg);
+        }
+
+        /* Capa 2: Árboles y fondo medio */
+        .layer-2 {
+            background-color: var(--forest-green);
+            transform: translateZ(-15px);
+            opacity: 0.8;
+        }
+        
+        /* Capa 3: Suelo con flores (como en la imagen) */
+        .layer-3 {
+            height: 30%;
+            bottom: 20px;
+            background-color: #f1efdb;
+            transform: translateZ(5px);
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        
+        /* Pequeños detalles de flores (como círculos de papel) */
+        .flower {
+            width: 15px; height: 15px;
+            background-color: #ffb3ba;
+            border-radius: 50%;
+            box-shadow: var(--shadow-inner);
+        }
+
+        /* --- CONEJITOS (Dibujo de papel) --- */
+        .bunny-couple {
+            position: absolute;
+            bottom: 50px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            border: 3px solid rgba(255,255,255,0.5);
+            transform: translateX(-50%) translateZ(20px); /* Ligeramente más adelante */
+            display: flex;
+            gap: 15px;
+        }
+        
+        .bunny-paper {
+            width: 50px;
+            height: 70px;
+            background-color: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px; /* Tamaño de los conejitos emoji */
-        }
-
-        /* --- EL BRAZO DEL TOCADISCOS (Papercraft Style) --- */
-        .tonearm-container {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            width: 30px;
-            height: 150px;
-            /* perspective: 1000px; /* Para efecto 3D si quisiéramos */
-        }
-
-        .tonearm-pivot {
-            width: 20px;
-            height: 20px;
-            background-color: #d1d1d1;
-            border-radius: 50%;
-            position: absolute;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .tonearm-body {
-            width: 8px;
-            height: 120px;
-            background-color: #f1f1f1; /* Brazo blanco */
-            position: absolute;
-            top: 15px; left: 50%;
-            transform: translateX(-50%);
-            border-radius: 4px;
-            box-shadow: var(--shadow-soft);
-            transition: transform 1s ease-in-out; /* Animación clave */
-            transform-origin: top center; /* Gira desde la base */
-            transform: rotate(-25deg); /* Posición inicial: LEVANTADO */
+            font-size: 30px; /* Usaremos emojis, pero muy pequeños y sutiles */
         }
         
-        /* La aguja/cabezal */
-        .tonearm-head {
-            width: 16px;
-            height: 25px;
-            background-color: #f1f1f1;
+        /* El ramo (sutil) */
+        .bunny-paper::after {
+            content: '💐';
+            font-size: 20px;
             position: absolute;
-            bottom: -5px; left: 50%;
-            transform: translateX(-50%) rotate(10deg);
-            border-radius: 3px;
-            box-shadow: var(--shadow-soft);
+            bottom: 10px;
+            right: -5px;
         }
 
-        /* --- BOTONES DE CONTROL (Simples círculos neomórficos) --- */
+        /* --- TÍTULO INTERIOR (Como en la imagen) --- */
+        .inner-title {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #555;
+            font-weight: normal;
+            font-style: italic;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- BOTONES DE CONTROL (Como en la imagen, neomórficos) --- */
         .controls {
             position: absolute;
             bottom: 10px;
@@ -187,132 +193,41 @@
         }
         
         .control-btn {
-            width: 15px;
-            height: 15px;
-            background-color: var(--vinyl-center);
+            width: 25px;
+            height: 25px;
+            background-color: #c9e1f0; /* Un azul más intenso */
             border-radius: 50%;
             box-shadow: var(--shadow-soft);
+            border: 2px solid rgba(255,255,255,0.5);
         }
 
-        /* --- ESTADOS DE ANIMACIÓN --- */
+        /* --- ESTADOS DE ANIMACIÓN (Al abrirse) --- */
 
-        /* 1. Cuando se activa ('playing'), el brazo BAJA */
-        .player-container.playing .tonearm-body {
-            transform: rotate(10deg); /* Baja hasta el disco */
+        /* 1. La Tapa se levanta y se abre hacia atrás */
+        .box-container:hover .box-lid {
+            transform: rotateX(-120deg);
+            opacity: 0.3; /* Se vuelve un poco transparente */
         }
 
-        /* 2. Cuando está sonando, el disco GIRA */
-        .player-container.playing .main-vinyl {
-            animation: vinylSpin 5s linear infinite 1s; /* Empieza 1s después, para que baje el brazo */
-        }
-
-        @keyframes vinylSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* --- TEXTO DEL TÍTULO (Papercraft Style) --- */
-        .title-text {
-            position: absolute;
-            bottom: 15px;
-            left: 20px;
-            font-size: 14px;
-            color: #555;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- MENSAJE SUTIL AL FINAL --- */
-        .secret-message {
-            position: absolute;
-            bottom: -50px; /* Escondido */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            box-shadow: var(--shadow-soft);
-            transition: bottom 1s ease-out 2s; /* Aparece lento después de que baje el brazo */
-            font-size: 14px;
-            color: #333;
-            z-index: 10;
-        }
-
-        .player-container.playing .secret-message {
-            bottom: 60px; /* Sube y aparece */
-        }
-
-        /* --- CORAZONES FLOTANTES --- */
-        .heart {
-            position: absolute;
-            color: rgba(255, 100, 100, 0.6);
-            font-size: 20px;
-            opacity: 0;
-            z-index: 5;
-        }
-
-        .player-container.playing .heart {
-            animation: heartFloat 3s ease-out infinite;
-        }
-
-        @keyframes heartFloat {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            20% { opacity: 1; }
-            100% { transform: translateY(-100px) scale(1.5) rotate(20deg); opacity: 0; }
+        /* 2. El Diorama BROTA (se despliega y aparece) */
+        .box-container:hover .diorama-forest {
+            transform: translateY(0) rotateX(0deg);
+            opacity: 1;
         }
 
     </style>
 </head>
 <body>
 
-    <div class="player-container" id="player">
+    <div class="box-container" id="musicBox">
         
-        <div class="lid-back">
-            <div class="rear-vinyl">
-                <div class="rear-vinyl-center"></div>
+        <div class="box-lid">
+            <div class="box-lid-text">
+                Haz clic<br>para abrir
             </div>
         </div>
         
-        <div class="base-plate">
-            <div class="main-vinyl">
-                <div class="main-vinyl-center">
-                    👩‍❤️‍👨 </div>
-            </div>
-
-            <div class="tonearm-container">
-                <div class="tonearm-pivot"></div>
-                <div class="tonearm-body">
-                    <div class="tonearm-head"></div>
-                </div>
-            </div>
-
-            <div class="controls">
-                <div class="control-btn"></div>
-                <div class="control-btn"></div>
-            </div>
-            <div class="title-text">Caja de Momentos</div>
-        </div>
-
-        <div class="secret-message">
-            Esta canción me recordó a ti... ✨
-        </div>
-
-        <div class="heart" style="top: 60%; left: 20%; animation-delay: 0s;">❤️</div>
-        <div class="heart" style="top: 55%; left: 75%; animation-delay: 1s;">💖</div>
-        <div class="heart" style="top: 70%; left: 45%; animation-delay: 2s;">💕</div>
-
-    </div>
-
-    <script>
-        const player = document.getElementById('player');
-
-        // Al hacer clic en cualquier parte de la caja...
-        player.addEventListener('click', () => {
-            // Alterna la clase 'playing', que activa todas las animaciones CSS
-            player.classList.toggle('playing');
-        });
-    </script>
-
-</body>
-</html>
+        <div class="box-body">
+            <div class="diorama-forest">
+                
+                <div class="paper-layer layer-1"></div> <div class="paper-layer layer-2"></div>
